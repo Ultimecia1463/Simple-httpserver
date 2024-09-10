@@ -22,6 +22,6 @@ public class Configurationmanager {
 
     public void getcurrentConfiguration(){
 
-    }
+    }   
 
 }
