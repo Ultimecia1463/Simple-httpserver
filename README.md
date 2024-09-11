@@ -5,59 +5,50 @@ A basic HTTP server implemented in Java, demonstrating essential server function
 ## Project Structure
 
 
-D:.
-│   pom.xml
-│   README.md
+D:.    
+│   pom.xml    
+│   README.md    
+│    
+├───.vscode    
+│       settings.json    
 │
-├───.vscode
-│       settings.json
-│
-├───src
-│   ├───main
-│   │   ├───java
-│   │   │   └───com
-│   │   │       └───ultimecia
-│   │   │           └───httpserver
-│   │   │               │   Httpserver.java
-│   │   │               │
-│   │   │               ├───config
-│   │   │               │       Configuration.java
-│   │   │               │       Configurationmanager.java
-│   │   │               │
-│   │   │               └───util
-│   │   │                       json.java
-│   │   │
-│   │   └───resources
-│   │           http.json
-│   │
-│   └───test
-│       └───java
-└───target
-    ├───classes
-    │   │   http.json
-    │   │
-    │   └───com
-    │       └───ultimecia
-    │           └───httpserver
-    │               │   Httpserver.class
-    │               │
-    │               ├───config
-    │               │       Configuration.class
-    │               │       Configurationmanager.class
-    │               │
-    │               └───util
-    │                       json.class
-    │
-    ├───generated-sources
-    │   └───annotations
-    ├───maven-status
-    │   └───maven-compiler-plugin
-    │       └───compile
-    │           └───default-compile
-    │                   createdFiles.lst
-    │                   inputFiles.lst
-    │
-    └───test-classes
+├───src    
+│   ├───main    
+│   │   ├───java    
+│   │   │   └───com    
+│   │   │       └───ultimecia    
+│   │   │           └───httpserver    
+│   │   │               │   Httpserver.java    
+│   │   │               │    
+│   │   │               ├───config    
+│   │   │               │       Configuration.java    
+│   │   │               │       Configurationmanager.java    
+│   │   │               │    
+│   │   │               └───util    
+│   │   │                       json.java    
+│   │   │    
+│   │   └───resources    
+│   │           http.json    
+│   │    
+│   └───test    
+│       └───java    
+└───target    
+    ├───classes    
+    │   │   http.json    
+    │   │    
+    │   └───com    
+    │       └───ultimecia    
+    │           └───httpserver    
+    │               │   Httpserver.class    
+    │               │    
+    │               ├───config    
+    │               │       Configuration.class    
+    │               │       Configurationmanager.class    
+    │               │    
+    │               └───util    
+    │                       json.class    
+    │     
+    └───test-classes    
 
 
 ## Features
