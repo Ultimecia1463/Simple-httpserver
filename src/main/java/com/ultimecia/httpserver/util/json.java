@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class json {
     
-    private static ObjectMapper myObjectMapper = defaultObjectMapper();
+    private static final ObjectMapper myObjectMapper = defaultObjectMapper();
 
     private  static ObjectMapper defaultObjectMapper(){
         ObjectMapper om = new ObjectMapper();
