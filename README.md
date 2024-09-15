@@ -16,7 +16,3 @@ A basic HTTP server implemented in Java, demonstrating essential server function
 2. **Build the project using Maven**:
    ```bash
     mvn clean install
-
-3. **Run the server**:
-   ```bash
-    java -jar target/simple-httpserver.jar
