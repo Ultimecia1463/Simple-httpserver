@@ -39,8 +39,14 @@ public class ServerListenerThread extends Thread{
             //serverSocket.close();
 
         } catch (IOException e) {
-            
-            e.printStackTrace();
+            ((org.slf4j.Logger) LOGGER).error("problem with setting socket"+e);
+        }finally{
+            if (serverSocket!=null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 }

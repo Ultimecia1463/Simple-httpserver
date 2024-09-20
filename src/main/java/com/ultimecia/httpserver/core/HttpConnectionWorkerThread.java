@@ -21,9 +21,13 @@ public class HttpConnectionWorkerThread extends Thread {
 
     @Override
     public void run(){
+
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+
         try {
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
 
             //reading
 
@@ -43,22 +47,29 @@ public class HttpConnectionWorkerThread extends Thread {
                 CRLF+CRLF               ;
 
             outputStream.write(response.getBytes());
-                
-            inputStream.close();
-            outputStream.close();
-            socket.close();
-
-            try {
-                sleep(5000);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-
             LOGGER.info(" * Connection process finished: ");
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ((org.slf4j.Logger) LOGGER).error("problem with communication"+e);
+        }finally{
+            if (inputStream!=null) {
+                try {
+                    inputStream.close();
+                } catch (IOException ex) {
+                }
+            }
+            if (outputStream!=null) {
+                try {
+                    outputStream.close();
+                } catch (IOException ex) {
+                }
+            }
+            if (socket!=null) {
+                try {
+                    socket.close();
+                } catch (IOException ex) {
+                }
+            }
         }
     }
 }
