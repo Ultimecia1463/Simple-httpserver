@@ -1,12 +1,16 @@
 package com.ultimecia.httpserver.core;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
+
 public class ServerListenerThread extends Thread{
+
+    private final static Logger LOGGER = (Logger) LoggerFactory.getLogger(ServerListenerThread.class);
 
     private int port;
     private String webroot;
@@ -21,37 +25,18 @@ public class ServerListenerThread extends Thread{
     @Override
     public void run(){
         try {
+
+            while(serverSocket.isBound() && !serverSocket.isClosed()){
             
-            Socket socket = serverSocket.accept();
+                Socket socket = serverSocket.accept();
 
-            InputStream inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
+                LOGGER.info(" * connection accepted:"+socket.getInetAddress());
 
-            //reading
+                HttpConnectionWorkerThread workerThread = new HttpConnectionWorkerThread(socket);
+                workerThread.start();
 
-
-
-            //writing
-            String html="<html> <head> <title> simple http server </title> <body> <h1>hello world</h1> </body> </head> </html>";
-
-            final String CRLF="\r\n"; // 13 , 10  ASCII
-
-            String response = 
-                "HTTP/1.1 200 ok"       +     //status line : HTTP_ver RESPONSE_CODE RESPONSE_MSG
-                CRLF                    +
-                "Content-length: "      +     // HEADER
-                html.getBytes().length  +
-                CRLF+CRLF               +
-                html                    +
-                CRLF+CRLF               ;
-
-            outputStream.write(response.getBytes());
-            
-
-            inputStream.close();
-            outputStream.close();
-            socket.close();
-            serverSocket.close();
+            }    
+            //serverSocket.close();
 
         } catch (IOException e) {
             
