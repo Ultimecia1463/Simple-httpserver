@@ -64,6 +64,7 @@ public class Httpparser {
                 }else if(!requestTargetParsed){
 
                     LOGGER.debug("Request Line Request to Process : {}",processingDataBuffer.toString());
+                    request.setRequestTarget(processingDataBuffer.toString());
                     requestTargetParsed=true;
                 }else{
                     throw new HttpParsingException(HttpStatusCodes.CLIENT_ERROR_400_BAD_REQUEST);
