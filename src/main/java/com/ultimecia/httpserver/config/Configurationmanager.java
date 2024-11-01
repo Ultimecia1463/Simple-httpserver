@@ -23,8 +23,10 @@ public class Configurationmanager {
         
     }
 
+    FileReader fileReader = null;
+
     public void loadConfigurationfile(String filePath){
-        FileReader fileReader =null;
+        
         try {
             fileReader = new FileReader(filePath);
         } catch (FileNotFoundException e) {
