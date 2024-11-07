@@ -3,7 +3,8 @@ package com.ultimecia.http;
 public class HttpRequest extends HttpMessage{
     private HttpMethod method;
     private String requestTarget;
-    private String httpVersion;
+    private String originalHttpVersion;
+    private HttpVersion bestCompatiableHttpVersion;
 
     HttpRequest(){
         
@@ -35,4 +36,14 @@ public class HttpRequest extends HttpMessage{
     public String getRequestTarget() {
         return requestTarget;
     }
+
+    void setHttpVersion(String originalHttpVersion) throws BadHttpVersionException, HttpParsingException {
+        this.originalHttpVersion = originalHttpVersion;
+        this.bestCompatiableHttpVersion = HttpVersion.getBestCompatibleVersion(originalHttpVersion);
+        if (this.bestCompatiableHttpVersion==null) {
+            throw new HttpParsingException(HttpStatusCodes.SERVER_ERROR_505_VERSION_NOT_SUPPORTED);
+        }
+        
+    }
+
 }
