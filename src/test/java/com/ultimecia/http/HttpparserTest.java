@@ -26,7 +26,7 @@ public class HttpparserTest {
         HttpRequest request=null;
         try {
             request = httpparser.parseHttpRequest(
-                generateValidTestCase()
+                    generateValidGETTestCase()
             );
         } catch (HttpParsingException e) {
             fail(e);
@@ -34,6 +34,8 @@ public class HttpparserTest {
         assertNotNull(request);
         assertEquals(request.getMethod(), HttpMethod.GET);
         assertEquals(request.getRequestTarget(), "/");
+        assertEquals(request.getOriginalHttpVersion(), "HTTP/1.1");
+        assertEquals(request.getBestCompatibleHttpVersion(), HttpVersion.HTTP_1_1);
     }
 
     @Test
@@ -52,7 +54,7 @@ public class HttpparserTest {
     void parseHttpRequestBadMethod2(){
         try {
             HttpRequest request = httpparser.parseHttpRequest(
-                generateBadTestCaseMethodName2()
+                    generateBadTestCaseMethodName2()
             );
             fail();
         } catch (HttpParsingException e) {
@@ -61,10 +63,10 @@ public class HttpparserTest {
     }
 
     @Test
-    void parseHttpRequestInvalidNoOfItems(){
+    void parseHttpRequestInvNumItems1() {
         try {
             HttpRequest request = httpparser.parseHttpRequest(
-                generateBadTestCaseRequestLineInvalidNoOfItems()
+                    generateBadTestCaseRequestLineInvNumItems1()
             );
             fail();
         } catch (HttpParsingException e) {
@@ -73,10 +75,10 @@ public class HttpparserTest {
     }
 
     @Test
-    void parseHttpEmptyRequestLine(){
+    void parseHttpEmptyRequestLine() {
         try {
             HttpRequest request = httpparser.parseHttpRequest(
-                generateBadTestCaseEmptyRequestLine()
+                    generateBadTestCaseEmptyRequestLine()
             );
             fail();
         } catch (HttpParsingException e) {
@@ -85,10 +87,10 @@ public class HttpparserTest {
     }
 
     @Test
-    void parseHttpRequestLineOnlyCRnoLF(){
+    void parseHttpRequestLineCRnoLF() {
         try {
             HttpRequest request = httpparser.parseHttpRequest(
-                generateBadTestCaseRequestLineOnlyCRnoLF()
+                    generateBadTestCaseRequestLineOnlyCRnoLF()
             );
             fail();
         } catch (HttpParsingException e) {
@@ -96,126 +98,202 @@ public class HttpparserTest {
         }
     }
 
+    @Test
+    void parseHttpRequestBadHttpVersion() {
+        try {
+            HttpRequest request = httpparser.parseHttpRequest(
+                    generateBadHttpVersionTestCase()
+            );
+            fail();
+        } catch (HttpParsingException e) {
+            assertEquals(e.getErrorCode(), HttpStatusCodes.CLIENT_ERROR_400_BAD_REQUEST);
+        }
+    }
 
-    private InputStream generateValidTestCase(){
-        String rawData ="GET / HTTP/1.1\r\n" +
-                        "Host: localhost:8080\r\n" + 
-                        "Connection: keep-alive\r\n" + 
-                        "sec-ch-ua: \"Brave\";v=\"129\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"129\"\r\n" + 
-                        "sec-ch-ua-mobile: ?0\r\n" + 
-                        "sec-ch-ua-platform: \"Windows\"\r\n" + 
-                        "Upgrade-Insecure-Requests: 1\r\n" + 
-                        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36\r\n" + 
-                        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8\r\n" + 
-                        "Sec-GPC: 1\r\n" + 
-                        "Accept-Language: en-US,en\r\n" + 
-                        "Sec-Fetch-Site: none\r\n" + 
-                        "Sec-Fetch-Mode: navigate\r\n" + 
-                        "Sec-Fetch-User: ?1\r\n" + 
-                        "Sec-Fetch-Dest: document\r\n" + 
-                        "Accept-Encoding: gzip, deflate, br, zstd\r\n" + 
-                        "\r\n";
-            InputStream inputStream = new ByteArrayInputStream(
+    @Test
+    void parseHttpRequestUnsupportedHttpVersion() {
+        try {
+            HttpRequest request = httpparser.parseHttpRequest(
+                    generateUnsuportedHttpVersionTestCase()
+            );
+            fail();
+        } catch (HttpParsingException e) {
+            assertEquals(e.getErrorCode(), HttpStatusCodes.SERVER_ERROR_505_HTTP_VERSION_NOT_SUPPORTED);
+        }
+    }
+
+    @Test
+    void parseHttpRequestSupportedHttpVersion1() {
+        try {
+            HttpRequest request = httpparser.parseHttpRequest(
+                    generateSupportedHttpVersion1()
+            );
+            assertNotNull(request);
+            assertEquals(request.getBestCompatibleHttpVersion(), HttpVersion.HTTP_1_1);
+            assertEquals(request.getOriginalHttpVersion(), "HTTP/1.2");
+        } catch (HttpParsingException e) {
+            fail();
+        }
+    }
+
+    private InputStream generateValidGETTestCase() {
+        String rawData = "GET / HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Upgrade-Insecure-Requests: 1\r\n" +
+                "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36\r\n" +
+                "Sec-Fetch-User: ?1\r\n" +
+                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n" +
+                "Sec-Fetch-Site: none\r\n" +
+                "Sec-Fetch-Mode: navigate\r\n" +
+                "Accept-Encoding: gzip, deflate, br\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+
+        InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                    StandardCharsets.US_ASCII
-            )
+                        StandardCharsets.US_ASCII
+                )
         );
 
         return inputStream;
     }
 
-    private InputStream generateBadTestCaseMethodName1(){
-        String rawData ="GeT / HTTP/1.1\r\n" +
-                        "Host: localhost:8080\r\n" + 
-                        "Accept-Language: en-US,en\r\n" + 
-                        "Sec-Fetch-Site: none\r\n" + 
-                        "Sec-Fetch-Mode: navigate\r\n" + 
-                        "Sec-Fetch-User: ?1\r\n" + 
-                        "Sec-Fetch-Dest: document\r\n" + 
-                        "Accept-Encoding: gzip, deflate, br, zstd\r\n" + 
-                        "\r\n";
-            InputStream inputStream = new ByteArrayInputStream(
+    private InputStream generateBadTestCaseMethodName1() {
+        String rawData = "GeT / HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+
+        InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                    StandardCharsets.US_ASCII
-            )
+                        StandardCharsets.US_ASCII
+                )
         );
-        
+
         return inputStream;
     }
 
-    private InputStream generateBadTestCaseMethodName2(){
-        String rawData ="GETTTTT / HTTP/1.1\r\n" +
-                        "Host: localhost:8080\r\n" + 
-                        "Accept-Language: en-US,en\r\n" + 
-                        "Sec-Fetch-Site: none\r\n" + 
-                        "Sec-Fetch-Mode: navigate\r\n" + 
-                        "Sec-Fetch-User: ?1\r\n" + 
-                        "Sec-Fetch-Dest: document\r\n" + 
-                        "Accept-Encoding: gzip, deflate, br, zstd\r\n" + 
-                        "\r\n";
-            InputStream inputStream = new ByteArrayInputStream(
+    private InputStream generateBadTestCaseMethodName2() {
+        String rawData = "GETTTT / HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+
+        InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                    StandardCharsets.US_ASCII
-            )
+                        StandardCharsets.US_ASCII
+                )
         );
-        
+
         return inputStream;
     }
 
-    private InputStream generateBadTestCaseRequestLineInvalidNoOfItems(){
-        String rawData ="GET / AAASUOB HTTP/1.1\r\n" +
-                        "Host: localhost:8080\r\n" + 
-                        "Accept-Language: en-US,en\r\n" + 
-                        "Sec-Fetch-Site: none\r\n" + 
-                        "Sec-Fetch-Mode: navigate\r\n" + 
-                        "Sec-Fetch-User: ?1\r\n" + 
-                        "Sec-Fetch-Dest: document\r\n" + 
-                        "Accept-Encoding: gzip, deflate, br, zstd\r\n" + 
-                        "\r\n";
-            InputStream inputStream = new ByteArrayInputStream(
+    private InputStream generateBadTestCaseRequestLineInvNumItems1() {
+        String rawData = "GET / AAAAAA HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                    StandardCharsets.US_ASCII
-            )
+                        StandardCharsets.US_ASCII
+                )
         );
-        
+
         return inputStream;
     }
 
-    private InputStream generateBadTestCaseEmptyRequestLine(){
-        String rawData ="\r\n" +
-                        "Host: localhost:8080\r\n" + 
-                        "Accept-Language: en-US,en\r\n" + 
-                        "Sec-Fetch-Site: none\r\n" + 
-                        "Sec-Fetch-Mode: navigate\r\n" + 
-                        "Sec-Fetch-User: ?1\r\n" + 
-                        "Sec-Fetch-Dest: document\r\n" + 
-                        "Accept-Encoding: gzip, deflate, br, zstd\r\n" + 
-                        "\r\n";
-            InputStream inputStream = new ByteArrayInputStream(
+    private InputStream generateBadTestCaseEmptyRequestLine() {
+        String rawData = "\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                    StandardCharsets.US_ASCII
-            )
+                        StandardCharsets.US_ASCII
+                )
         );
-        
+
         return inputStream;
     }
 
-    private InputStream generateBadTestCaseRequestLineOnlyCRnoLF(){
-        String rawData ="GET / HTTP/1.1\r" +
-                        "Host: localhost:8080\r\n" + 
-                        "Accept-Language: en-US,en\r\n" + 
-                        "Sec-Fetch-Site: none\r\n" + 
-                        "Sec-Fetch-Mode: navigate\r\n" + 
-                        "Sec-Fetch-User: ?1\r\n" + 
-                        "Sec-Fetch-Dest: document\r\n" + 
-                        "Accept-Encoding: gzip, deflate, br, zstd\r\n" + 
-                        "\r\n";
-            InputStream inputStream = new ByteArrayInputStream(
+    private InputStream generateBadTestCaseRequestLineOnlyCRnoLF() {
+        String rawData = "GET / HTTP/1.1\r" + // <----- no LF
+                "Host: localhost:8080\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
                 rawData.getBytes(
-                    StandardCharsets.US_ASCII
-            )
+                        StandardCharsets.US_ASCII
+                )
         );
-        
+
+        return inputStream;
+    }
+
+    private InputStream generateBadHttpVersionTestCase() {
+        String rawData = "GET / HTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Upgrade-Insecure-Requests: 1\r\n" +
+                "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36\r\n" +
+                "Sec-Fetch-User: ?1\r\n" +
+                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n" +
+                "Sec-Fetch-Site: none\r\n" +
+                "Sec-Fetch-Mode: navigate\r\n" +
+                "Accept-Encoding: gzip, deflate, br\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
+                rawData.getBytes(
+                        StandardCharsets.US_ASCII
+                )
+        );
+
+        return inputStream;
+    }
+
+    private InputStream generateUnsuportedHttpVersionTestCase() {
+        String rawData = "GET / HTTP/2.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Upgrade-Insecure-Requests: 1\r\n" +
+                "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36\r\n" +
+                "Sec-Fetch-User: ?1\r\n" +
+                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n" +
+                "Sec-Fetch-Site: none\r\n" +
+                "Sec-Fetch-Mode: navigate\r\n" +
+                "Accept-Encoding: gzip, deflate, br\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
+                rawData.getBytes(
+                        StandardCharsets.US_ASCII
+                )
+        );
+
+        return inputStream;
+    }
+
+    private InputStream generateSupportedHttpVersion1() {
+        String rawData = "GET / HTTP/1.2\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Connection: keep-alive\r\n" +
+                "Upgrade-Insecure-Requests: 1\r\n" +
+                "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36\r\n" +
+                "Sec-Fetch-User: ?1\r\n" +
+                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n" +
+                "Sec-Fetch-Site: none\r\n" +
+                "Sec-Fetch-Mode: navigate\r\n" +
+                "Accept-Encoding: gzip, deflate, br\r\n" +
+                "Accept-Language: en-US,en;q=0.9,es;q=0.8,pt;q=0.7,de-DE;q=0.6,de;q=0.5,la;q=0.4\r\n" +
+                "\r\n";
+        InputStream inputStream = new ByteArrayInputStream(
+                rawData.getBytes(
+                        StandardCharsets.US_ASCII
+                )
+        );
+
         return inputStream;
     }
 }
