@@ -14,6 +14,14 @@ public class HttpRequest extends HttpMessage{
         return method;
     }
 
+    public String getOriginalHttpVersion() {
+        return originalHttpVersion;
+    }
+
+    public HttpVersion getBestCompatibleHttpVersion() {
+        return bestCompatiableHttpVersion;
+    }
+
     void setMethod(String methodName) throws HttpParsingException {
         for(HttpMethod method:HttpMethod.values()){
             if(methodName.equals(method.name())){

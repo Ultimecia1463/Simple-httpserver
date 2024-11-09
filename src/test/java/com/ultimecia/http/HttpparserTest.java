@@ -118,7 +118,7 @@ public class HttpparserTest {
             );
             fail();
         } catch (HttpParsingException e) {
-            assertEquals(e.getErrorCode(), HttpStatusCodes.SERVER_ERROR_505_HTTP_VERSION_NOT_SUPPORTED);
+            assertEquals(e.getErrorCode(), HttpStatusCodes.SERVER_ERROR_505_VERSION_NOT_SUPPORTED);
         }
     }
 
